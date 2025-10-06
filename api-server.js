@@ -12,13 +12,15 @@ const cors = require('cors');
 const githubRoutes = require('./routes/github');
 const cloudflareRoutes = require('./routes/cloudflare');
 const combinedRoutes = require('./routes/combined');
+const analysisRoutes = require('./routes/analysis');
 
 const app = express();
 const PORT = 3000;
 
 // Middleware
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '50mb' })); // Increased for bulk repo data
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Logging middleware
 app.use((req, res, next) => {
@@ -35,6 +37,7 @@ app.get('/health', (_req, res) => {
 app.use('/api/github', githubRoutes);
 app.use('/api/cloudflare', cloudflareRoutes);
 app.use('/api/combined', combinedRoutes);
+app.use('/api/analysis', analysisRoutes);
 
 // Error handling
 app.use((err, _req, res, _next) => {
@@ -75,5 +78,15 @@ app.listen(PORT, () => {
   console.log('  GET  /api/cloudflare/container/list');
   console.log('\n  🔗 Combined Operations:');
   console.log('  POST /api/combined/clone-and-deploy');
-  console.log('\n✨ Ready to handle GitHub + Cloudflare operations!\n');
+  console.log('\n  🔬 Bulk Analysis:');
+  console.log('  POST /api/analysis/bulk');
+  console.log('  POST /api/analysis/all');
+  console.log('  GET  /api/analysis/status/:jobId');
+  console.log('  GET  /api/analysis/queue');
+  console.log('  POST /api/analysis/pause');
+  console.log('  POST /api/analysis/resume');
+  console.log('  POST /api/analysis/cancel/:jobId');
+  console.log('  GET  /api/analysis/stats');
+  console.log('  GET  /api/analysis/cached/:repoName');
+  console.log('\n✨ Ready to handle GitHub + Cloudflare + Bulk Analysis operations!\n');
 });

@@ -18,8 +18,7 @@ class OllamaClient {
     try {
       const response = await fetch(`${this.baseURL}/api/tags`);
       return response.ok;
-    } catch (error) {
-      console.error('Ollama health check failed:', error);
+    } catch (_error) {
       return false;
     }
   }
@@ -39,8 +38,7 @@ class OllamaClient {
       this.modelsCache = data.models || [];
       this.lastCacheUpdate = now;
       return this.modelsCache;
-    } catch (error) {
-      console.error('Failed to list models:', error);
+    } catch (_error) {
       return [];
     }
   }
@@ -56,8 +54,7 @@ class OllamaClient {
         body: JSON.stringify({ name: modelName })
       });
       return await response.json();
-    } catch (error) {
-      console.error(`Failed to get model info for ${modelName}:`, error);
+    } catch (_error) {
       return null;
     }
   }
@@ -87,7 +84,6 @@ class OllamaClient {
       const data = await response.json();
       return data.response;
     } catch (error) {
-      console.error('Generation failed:', error);
       throw error;
     }
   }

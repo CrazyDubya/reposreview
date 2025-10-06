@@ -38,3 +38,4 @@ tmp/
 # OS
 Thumbs.db
 .DS_Store
+analysis_cache.db

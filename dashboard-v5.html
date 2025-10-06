@@ -770,12 +770,14 @@
       <div id="repoContainer" class="repo-grid"></div>
     </div>
 
+    <script src="v5/js/bulk_analysis.js"></script>
     <script>
       let repos = [];
       let filteredRepos = [];
       let activeCategory = 'all';
       let activeAIMLSubcategory = 'all';
       let charts = {};
+      let bulkAnalysis = null;
 
       // Initialize
       document.addEventListener('DOMContentLoaded', async () => {
@@ -784,6 +786,11 @@
         renderCharts();
         renderCategoryPills();
         filterAndRender();
+
+        // Initialize bulk analysis
+        bulkAnalysis = new BulkAnalysisClient();
+        bulkAnalysis.init();
+        bulkAnalysis.addCheckboxesToCards();
       });
 
       // Load complete AI/ML deep analysis data
