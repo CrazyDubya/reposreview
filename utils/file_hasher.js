@@ -27,7 +27,12 @@ class FileHasher {
     };
 
     // Create deterministic JSON string
-    const hashString = JSON.stringify(hashInput, Object.keys(hashInput).sort());
+    const hashString = JSON.stringify(hashInput, (_key, value) => {
+      if (value && typeof value === 'object' && !Array.isArray(value)) {
+        return Object.fromEntries(Object.keys(value).sort().map(key => [key, value[key]]));
+      }
+      return value;
+    });
 
     // Calculate SHA-256
     return crypto.createHash('sha256').update(hashString).digest('hex');
