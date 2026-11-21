@@ -156,6 +156,10 @@ class QueueManager extends EventEmitter {
         // Emit to external processor (will be handled by analysis route)
         const result = await this.processRepo(repo, job.jobId, job.forceRefresh);
 
+        if (result && result.success === false) {
+          throw new Error(result.error || 'Repository analysis failed');
+        }
+
         job.results.push({ repo: repo.name, success: true, result });
         job.progress = i + 1;
 
@@ -175,6 +179,9 @@ class QueueManager extends EventEmitter {
           repoName: repo.name,
           error: error.message
         });
+
+        job.progress = i + 1;
+        this.db.updateJobStatus(job.jobId, 'running', job.progress);
       }
     }
 
