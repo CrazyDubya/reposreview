@@ -90,14 +90,14 @@ Be concise and specific.`;
 /**
  * Queue event handlers
  */
-queueManager.on('repo:process', async ({ repo, jobId }) => {
+queueManager.on('repo:process', async ({ repo, jobId, forceRefresh = false }) => {
   try {
     // Calculate hash
     const fileHash = FileHasher.calculateHash(repo);
     const stats = FileHasher.getFileStats(repo);
 
     // Check cache
-    if (dbManager.needsAnalysis(repo.name, fileHash)) {
+    if (forceRefresh || dbManager.needsAnalysis(repo.name, fileHash)) {
       // Select model
       const model = FileHasher.selectOptimalModel(repo);
 
@@ -171,7 +171,7 @@ router.post('/bulk', async (req, res) => {
     }
 
     // Create job
-    const jobId = queueManager.createJob(reposToAnalyze, priority);
+    const jobId = queueManager.createJob(reposToAnalyze, priority, forceRefresh);
 
     res.json({
       success: true,
@@ -221,7 +221,7 @@ router.post('/all', async (req, res) => {
     }
 
     // Create low-priority job
-    const jobId = queueManager.createJob(reposToAnalyze, 'normal');
+    const jobId = queueManager.createJob(reposToAnalyze, 'normal', forceRefresh);
 
     res.json({
       success: true,

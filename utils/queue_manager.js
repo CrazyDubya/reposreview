@@ -20,7 +20,7 @@ class QueueManager extends EventEmitter {
   /**
    * Create new analysis job
    */
-  createJob(repos, priority = 'normal') {
+  createJob(repos, priority = 'normal', forceRefresh = false) {
     const jobId = uuidv4();
 
     this.db.createJob(jobId, repos);
@@ -29,6 +29,7 @@ class QueueManager extends EventEmitter {
       jobId,
       repos,
       priority,
+      forceRefresh,
       progress: 0,
       status: 'pending',
       createdAt: new Date(),
@@ -153,7 +154,7 @@ class QueueManager extends EventEmitter {
         });
 
         // Emit to external processor (will be handled by analysis route)
-        const result = await this.processRepo(repo, job.jobId);
+        const result = await this.processRepo(repo, job.jobId, job.forceRefresh);
 
         job.results.push({ repo: repo.name, success: true, result });
         job.progress = i + 1;
@@ -196,7 +197,7 @@ class QueueManager extends EventEmitter {
   /**
    * Process single repository (placeholder - actual processing in route)
    */
-  async processRepo(repo, jobId) {
+  async processRepo(repo, jobId, forceRefresh = false) {
     // This will be called by the analysis route
     // Return a promise that resolves when repo is analyzed
     return new Promise((resolve) => {
@@ -210,7 +211,7 @@ class QueueManager extends EventEmitter {
       this.on('repo:result', handler);
 
       // Emit request to process
-      this.emit('repo:process', { repo, jobId });
+      this.emit('repo:process', { repo, jobId, forceRefresh });
     });
   }
 
