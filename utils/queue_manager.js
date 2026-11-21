@@ -116,7 +116,7 @@ class QueueManager extends EventEmitter {
         // Priority order: high > normal > low
         const priorityOrder = { high: 0, normal: 1, low: 2 };
         const priorityDiff =
-          (priorityOrder[a.priority] || 1) - (priorityOrder[b.priority] || 1);
+          (priorityOrder[a.priority] ?? 1) - (priorityOrder[b.priority] ?? 1);
 
         if (priorityDiff !== 0) {
           return priorityDiff;
