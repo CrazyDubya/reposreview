@@ -42,7 +42,7 @@ class QueueManager extends EventEmitter {
     this.emit('job:created', { jobId, total: repos.length });
 
     // Auto-start processing if not running
-    if (!this.running) {
+    if (!this.running && !this.paused) {
       this.start();
     }
 
@@ -73,6 +73,8 @@ class QueueManager extends EventEmitter {
 
       await this.processJob(job);
     }
+
+    this.running = false;
   }
 
   /**
@@ -138,7 +140,7 @@ class QueueManager extends EventEmitter {
     this.db.updateJobStatus(job.jobId, 'running');
     this.emit('job:started', { jobId: job.jobId, total: job.repos.length });
 
-    for (let i = 0; i < job.repos.length; i++) {
+    for (let i = job.progress; i < job.repos.length; i++) {
       if (this.paused || !this.running || job.status === 'cancelled') {
         break;
       }
@@ -183,6 +185,13 @@ class QueueManager extends EventEmitter {
         job.progress = i + 1;
         this.db.updateJobStatus(job.jobId, 'running', job.progress);
       }
+    }
+
+    if (this.paused && job.status !== 'cancelled' && job.progress < job.repos.length) {
+      job.status = 'pending';
+      this.db.updateJobStatus(job.jobId, 'pending', job.progress);
+      this.currentProcessing = null;
+      return;
     }
 
     // Job complete
